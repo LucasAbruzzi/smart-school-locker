@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, Calendar, QrCode, Settings, BookOpen, Laptop, Camera, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +7,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
+    } else {
+      navigate('/catalog');
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   const featuredItems = [
     {
@@ -87,9 +101,11 @@ const Index = () => {
               <Button variant="outline" size="sm">
                 Inloggen
               </Button>
-              <Button variant="ghost" size="sm">
-                <Settings className="w-4 h-4" />
-              </Button>
+              <Link to="/admin">
+                <Button variant="ghost" size="sm">
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -114,23 +130,28 @@ const Index = () => {
                 placeholder="Zoek apparaten (bijv. MacBook, Canon camera, boormachine)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="pl-10 py-6 text-lg"
               />
-              <Button className="absolute right-2 top-2" size="sm">
+              <Button onClick={handleSearch} className="absolute right-2 top-2" size="sm">
                 Zoeken
               </Button>
             </div>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-primary text-primary-foreground">
-              <Calendar className="w-5 h-5 mr-2" />
-              Bekijk Beschikbaarheid
-            </Button>
-            <Button variant="outline" size="lg">
-              <QrCode className="w-5 h-5 mr-2" />
-              QR-Code Scanner
-            </Button>
+            <Link to="/catalog">
+              <Button size="lg" className="bg-primary text-primary-foreground">
+                <Calendar className="w-5 h-5 mr-2" />
+                Bekijk Beschikbaarheid
+              </Button>
+            </Link>
+            <Link to="/qr-scan">
+              <Button variant="outline" size="lg">
+                <QrCode className="w-5 h-5 mr-2" />
+                QR-Code Scanner
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -143,15 +164,17 @@ const Index = () => {
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((category) => (
-              <Card key={category.name} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-6 text-center">
-                  <div className={`w-12 h-12 rounded-lg ${category.color} mx-auto mb-3 flex items-center justify-center`}>
-                    <category.icon className="w-6 h-6" />
-                  </div>
-                  <h4 className="font-semibold text-foreground mb-1">{category.name}</h4>
-                  <p className="text-sm text-muted-foreground">{category.count} items</p>
-                </CardContent>
-              </Card>
+              <Link key={category.name} to={`/catalog?category=${encodeURIComponent(category.name)}`}>
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-6 text-center">
+                    <div className={`w-12 h-12 rounded-lg ${category.color} mx-auto mb-3 flex items-center justify-center`}>
+                      <category.icon className="w-6 h-6" />
+                    </div>
+                    <h4 className="font-semibold text-foreground mb-1">{category.name}</h4>
+                    <p className="text-sm text-muted-foreground">{category.count} items</p>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
@@ -187,9 +210,11 @@ const Index = () => {
                        'Niet beschikbaar'}
                     </div>
                   </div>
-                  <Button className="w-full" disabled={item.available === 0}>
-                    {item.available > 0 ? 'Reserveer Nu' : 'Uitverkocht'}
-                  </Button>
+                  <Link to="/catalog">
+                    <Button className="w-full" disabled={item.available === 0}>
+                      {item.available > 0 ? 'Reserveer Nu' : 'Uitverkocht'}
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}
@@ -204,35 +229,41 @@ const Index = () => {
             Snelle Acties
           </h3>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <Calendar className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h4 className="font-semibold text-foreground mb-2">Reservering Maken</h4>
-                <p className="text-sm text-muted-foreground">
-                  Bekijk beschikbaarheid en reserveer direct
-                </p>
-              </CardContent>
-            </Card>
+            <Link to="/catalog">
+              <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <Calendar className="w-12 h-12 text-primary mx-auto mb-4" />
+                  <h4 className="font-semibold text-foreground mb-2">Reservering Maken</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Bekijk beschikbaarheid en reserveer direct
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
             
-            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <QrCode className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h4 className="font-semibold text-foreground mb-2">QR-Code Scannen</h4>
-                <p className="text-sm text-muted-foreground">
-                  Haal je gereserveerde apparaat op
-                </p>
-              </CardContent>
-            </Card>
+            <Link to="/qr-scan">
+              <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <QrCode className="w-12 h-12 text-primary mx-auto mb-4" />
+                  <h4 className="font-semibold text-foreground mb-2">QR-Code Scannen</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Haal je gereserveerde apparaat op
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
             
-            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <BookOpen className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h4 className="font-semibold text-foreground mb-2">Mijn Reserveringen</h4>
-                <p className="text-sm text-muted-foreground">
-                  Bekijk je actieve en geplande reserveringen
-                </p>
-              </CardContent>
-            </Card>
+            <Link to="/my-reservations">
+              <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <BookOpen className="w-12 h-12 text-primary mx-auto mb-4" />
+                  <h4 className="font-semibold text-foreground mb-2">Mijn Reserveringen</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Bekijk je actieve en geplande reserveringen
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
         </div>
       </section>
@@ -258,10 +289,10 @@ const Index = () => {
               <Link to="/help" className="block text-sm opacity-90 hover:opacity-100 transition-opacity">
                 Veelgestelde vragen
               </Link>
-              <Link to="/terms" className="block text-sm opacity-90 hover:opacity-100 transition-opacity">
+              <a href="/terms" className="block text-sm opacity-90 hover:opacity-100 transition-opacity">
                 Voorwaarden
-              </Link>
-              <Link to="/contact" className="block text-sm opacity-90 hover:opacity-100 transition-opacity">
+              </a>
+              <Link to="/help" className="block text-sm opacity-90 hover:opacity-100 transition-opacity">
                 Contact opnemen
               </Link>
             </div>
